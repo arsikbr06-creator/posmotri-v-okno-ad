@@ -2,120 +2,150 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Посмотри в окно</title>
-    <link rel="stylesheet" href="./fonts/fonts.css" />
-    <link rel="stylesheet" href="./styles/style.css" />
-    <link rel="stylesheet" href="./styles/preloader.css" />
-    <link rel="stylesheet" href="./styles/error.css" />
+    <link rel="stylesheet" href="./style.css" />
   </head>
   <body class="page">
     <main class="content">
-      <section class="result">
-        <div class="result__video-container">
-          <video src="" controls class="result__video" poster=""></video>
+      <div class="result">
+        <div class="result__video-container" id="video-container">
+          <video
+            class="result__video"
+            id="result-video"
+            src=""
+            autoplay
+            muted
+            loop
+          ></video>
         </div>
-        <form class="search-form">
+        <form class="search-form" id="search-form" action="#">
           <fieldset class="search-form__fieldset">
-            <h2 class="search-form__fieldset-title">Город</h2>
-            <label class="search-form__label">
-              <span class="search-form__label-text visually-hidden">Город</span>
+            <legend class="search-form__fieldset-title visually-hidden">
+              Город
+            </legend>
+            <label class="search-form__label" for="city">
+              <img
+                class="search-form__icon"
+                src="./img/icon_search.svg"
+                alt="Поиск"
+              />
               <input
+                class="search-form__input"
                 type="text"
-                placeholder="Санкт Петербург, например"
                 name="city"
-                class="search-form__textfield"
+                id="city"
+                placeholder="Введите город"
               />
             </label>
           </fieldset>
           <fieldset class="search-form__fieldset">
-            <h2 class="search-form__fieldset-title">Время суток</h2>
-            <div class="search-form__checkbox-list">
-              <label class="search-form__label">
-                <input
-                  type="checkbox"
-                  name="time"
-                  value="morning"
-                  class="search-form__checkbox visually-hidden"
-                />
-                <span class="search-form__pseudo-checkbox"></span>
-                <span class="search-form__label-text">Утро</span>
-              </label>
-              <label class="search-form__label">
-                <input
-                  type="checkbox"
-                  name="time"
-                  value="afternoon"
-                  class="search-form__checkbox visually-hidden"
-                />
-                <span class="search-form__pseudo-checkbox"></span>
-                <span class="search-form__label-text">День</span>
-              </label>
-              <label class="search-form__label">
-                <input
-                  type="checkbox"
-                  name="time"
-                  value="night"
-                  class="search-form__checkbox visually-hidden"
-                />
-                <span class="search-form__pseudo-checkbox"></span>
-                <span class="search-form__label-text">Ночь</span>
-              </label>
-            </div>
+            <legend class="search-form__fieldset-title">Ночь, день</legend>
+            <ul class="search-form__checkbox-list">
+              <li class="search-form__checkbox-list-item">
+                <label class="search-form__label">
+                  <input
+                    class="search-form__checkbox visually-hidden"
+                    type="checkbox"
+                    name="time_of_day"
+                    value="morning"
+                  />
+                  <span class="search-form__pseudo-checkbox"></span>
+                  Утро
+                </label>
+              </li>
+              <li class="search-form__checkbox-list-item">
+                <label class="search-form__label">
+                  <input
+                    class="search-form__checkbox visually-hidden"
+                    type="checkbox"
+                    name="time_of_day"
+                    value="day"
+                  />
+                  <span class="search-form__pseudo-checkbox"></span>
+                  День
+                </label>
+              </li>
+              <li class="search-form__checkbox-list-item">
+                <label class="search-form__label">
+                  <input
+                    class="search-form__checkbox visually-hidden"
+                    type="checkbox"
+                    name="time_of_day"
+                    value="evening"
+                  />
+                  <span class="search-form__pseudo-checkbox"></span>
+                  Вечер
+                </label>
+              </li>
+              <li class="search-form__checkbox-list-item">
+                <label class="search-form__label">
+                  <input
+                    class="search-form__checkbox visually-hidden"
+                    type="checkbox"
+                    name="time_of_day"
+                    value="night"
+                  />
+                  <span class="search-form__pseudo-checkbox"></span>
+                  Ночь
+                </label>
+              </li>
+            </ul>
           </fieldset>
-          <button type="submit" class="button search-form__submit-button">
+          <button class="button search-form__submit-button" type="submit">
             Найти
           </button>
         </form>
-      </section>
-      <section class="content__details">
-        <h1 class="title">
-          <span class="content__accent">По-</span><br />смотри<br />в окно
-        </h1>
-        <div class="content__list-container">
-          <ul class="content__list">
-            <!-- ЗДЕСЬ ОКАЖУТСЯ ТЕМПЛЕЙТЫ КАРТОЧЕК -->
-          </ul>
-        </div>
-      </section>
-    </main>
+      </div>
 
-    <!-- ТЕМПЛЕЙТЫ -->
-
-    <template class="preloader-template">
-      <div class="preloader">
-        <div class="preloader-chasing-squares">
-          <div class="square"></div>
-          <div class="square"></div>
-          <div class="square"></div>
-          <div class="square"></div>
+      <div class="content__details">
+        <h2 class="title">
+          Смотреть в <span class="content__accent">окно</span>
+        </h2>
+        <div class="content__list-container" id="list-container">
+          <ul class="content__list" id="card-list"></ul>
         </div>
       </div>
-    </template>
+    </main>
 
-    <template class="cards-list-item-template">
+    <!-- Шаблон карточки -->
+    <template class="card-template">
       <li class="content__list-item">
-        <a href="#0" class="content__card-link">
+        <a class="content__card-link" href="#">
           <article class="content__video-card">
+            <img
+              class="content__video-card-thumbnail"
+              src=""
+              alt=""
+            />
             <div class="content__video-card-description-container">
-              <h2 class="content__video-card-title"></h2>
+              <h3 class="content__video-card-title"></h3>
               <p class="content__video-card-description"></p>
             </div>
-            <img src="" alt="" class="content__video-card-thumbnail" />
           </article>
         </a>
       </li>
     </template>
-    <template class="more-button-template">
-      <button class="button more-button">Показать еще</button>
-    </template>
 
-    <template class="error-template">
-      <div class="error">
-        <h2 class="error__title">Из этого города нет видео :(</h2>
+    <!-- Шаблон прелоадера -->
+    <template class="preloader-template">
+      <div class="preloader">
+        <span class="preloader__circle"></span>
       </div>
     </template>
-    <script src="./scripts/script.js"></script>
+
+    <!-- Шаблон кнопки «Показать ещё» -->
+    <template class="more-button-template">
+      <button class="button more-button" type="button">Показать ещё</button>
+    </template>
+
+    <!-- Шаблон ошибки -->
+    <template class="error-template">
+      <div class="result__error">
+        <p class="result__error-text"></p>
+      </div>
+    </template>
+
+    <script src="./script.js"></script>
   </body>
 </html>

@@ -1,33 +1,46 @@
+/* ====================================
+   ШРИФТЫ
+   Если в стартере есть файлы шрифтов —
+   раскомментируйте @font-face ниже.
+   ==================================== */
+
+/*
+@font-face {
+  font-family: 'HelveticaNeue';
+  src: url('./fonts/HelveticaNeue.woff2') format('woff2'),
+       url('./fonts/HelveticaNeue.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HelveticaNeue';
+  src: url('./fonts/HelveticaNeue-Bold.woff2') format('woff2'),
+       url('./fonts/HelveticaNeue-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+*/
+
+/* ====================================
+   ПЕРЕМЕННЫЕ
+   ==================================== */
+
+:root {
+  --color-bg: #1b1919;
+  --color-text: #fff;
+  --color-active: #545050;
+  --color-border: #fff;
+}
+
+/* ====================================
+   СБРОС И БАЗОВЫЕ СТИЛИ
+   ==================================== */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-html {
-  block-size: 100%;
-}
-
-.page {
-  inline-size: 1200px;
-  block-size: 100%;
-  margin: auto;
-  color: #fff;
-  font-family: 'Fira Sans Condensed', sans-serif;
-  font-size: 18px;
-  background-color: #1b1919;
-}
-
-h1,
-h2,
-h3,
-h4,
-p,
-ul,
-ol,
-li,
-blockquote,
-fieldset {
   margin: 0;
   padding: 0;
 }
@@ -37,15 +50,465 @@ ol {
   list-style: none;
 }
 
-/* Кастомный скроллбар */
-.custom-scrollbar::-webkit-scrollbar {
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'HelveticaNeue', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ====================================
+   VISUALLY HIDDEN
+   ==================================== */
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ====================================
+   КАСТОМНЫЙ СКРОЛЛБАР
+   ==================================== */
+
+::-webkit-scrollbar {
   width: 4px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgb(217 217 217 / 10%);
+::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #D9D9D9;
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-text);
+}
+
+/* ====================================
+   ПРЕЛОАДЕР
+   ==================================== */
+
+.preloader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--color-bg);
+  z-index: 10;
+}
+
+.preloader__circle {
+  display: block;
+  inline-size: 50px;
+  block-size: 50px;
+  border: 4px solid transparent;
+  border-top-color: var(--color-text);
+  border-radius: 50%;
+  animation: preloader-spin 0.8s linear infinite;
+}
+
+@keyframes preloader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ====================================
+   ОШИБКА
+   ==================================== */
+
+.result__error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  block-size: 100%;
+  padding: 20px;
+}
+
+.result__error-text {
+  font-size: 18px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+/* ====================================
+   ШАГ 1. ЛЕЙАУТ
+   ==================================== */
+
+/* Страница */
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-block-size: 100vh;
+  background-color: var(--color-bg);
+}
+
+/* Контент — грид-контейнер */
+.content {
+  display: grid;
+  grid-template-columns: 711px 1fr;
+  grid-template-areas: "result details";
+  column-gap: 30px;
+  align-items: end;
+  inline-size: 1270px;
+}
+
+.result {
+  grid-area: result;
+}
+
+.content__details {
+  grid-area: details;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  row-gap: 22px;
+}
+
+/* Форма поиска */
+.search-form {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  column-gap: 40px;
+  padding-block-start: 19px;
+}
+
+.search-form__fieldset {
+  flex: 1;
+  border: none;
+  min-inline-size: 0;
+}
+
+/* Список с карточками */
+.content__list-container {
+  block-size: 410px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.content__list {
+  display: flex;
+  flex-direction: column;
+  row-gap: 0;
+}
+
+/* ====================================
+   ШАГ 2. РАЗМЕРЫ
+   ==================================== */
+
+/* Видео-контейнер */
+.result__video-container {
+  inline-size: 100%;
+  block-size: 386px;
+  position: relative;
+  margin-block-end: 0;
+}
+
+.result__video {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Карточки — отступы между ними */
+.content__list-item {
+  padding-inline: 3px;
+}
+
+/* Сама карточка */
+.content__video-card {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  column-gap: 11px;
+}
+
+/* Миниатюра карточки */
+.content__video-card-thumbnail {
+  display: block;
+  inline-size: 194px;
+  block-size: 103px;
+  flex-shrink: 0;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Описание карточки занимает оставшееся место */
+.content__video-card-description-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  row-gap: 6px;
+  min-inline-size: 0;
+  padding-block: 6px;
+}
+
+/* ====================================
+   ШАГ 3. СТИЛИ ТЕКСТОВ
+   ==================================== */
+
+/* Заголовок секции с карточками */
+.title {
+  font-size: 75px;
+  font-weight: 700;
+  line-height: 0.87;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.content__accent {
+  color: var(--color-text);
+  font-style: italic;
+}
+
+/* Подпись у чекбоксов / fieldset title */
+.search-form__fieldset-title {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+  margin-block-end: 5px;
+}
+
+/* Ссылка-карточка — убираем дефолтный стиль ссылки */
+.content__card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  padding-block: 2px;
+}
+
+/* Заголовок карточки — обрезка с ... */
+.content__video-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Описание карточки — 4 строки, потом ... */
+.content__video-card-description {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+/* ====================================
+   ШАГ 4. СТИЛИ ФОРМ
+   ==================================== */
+
+/* Лейбл — inline-flex строка */
+.search-form__label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  column-gap: 10px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+/* Иконка поиска */
+.search-form__icon {
+  display: block;
+  inline-size: 20px;
+  block-size: 20px;
+  flex-shrink: 0;
+}
+
+/* Текстовое поле ввода */
+.search-form__input {
+  display: block;
+  appearance: none;
+  background-color: transparent;
+  border: none;
+  border-block-start: 1px solid var(--color-text);
+  border-block-end: 1px solid var(--color-text);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 18px;
+  line-height: 1;
+  padding-block: 8px;
+  padding-inline: 0;
+  inline-size: 100%;
+  outline: none;
+}
+
+.search-form__input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Обводка лейбла при фокусе на поле ввода */
+.search-form__label:has(:focus-visible) {
+  outline: 1px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* Список чекбоксов в строку */
+.search-form__checkbox-list {
+  display: flex;
+  flex-direction: row;
+  column-gap: 15px;
+}
+
+/* Лейбл чекбокса */
+.search-form__checkbox-list-item .search-form__label {
+  column-gap: 7px;
+}
+
+/* Псевдо-чекбокс */
+.search-form__pseudo-checkbox {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  inline-size: 19px;
+  block-size: 19px;
+  border: 1px solid var(--color-text);
+}
+
+/* Внутренний квадрат псевдо-чекбокса (скрыт по умолчанию) */
+.search-form__pseudo-checkbox::after {
+  content: '';
+  display: none;
+  inline-size: 17px;
+  block-size: 17px;
+  background-color: var(--color-text);
+}
+
+/* Показываем внутренний квадрат, когда чекбокс отмечен */
+.search-form__checkbox:checked + .search-form__pseudo-checkbox::after {
+  display: block;
+}
+
+/* Обводка лейбла при фокусе на чекбоксе */
+.search-form__label:has(.search-form__checkbox:focus-visible) {
+  outline: 1px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* Подчёркивание при наведении на лейбл чекбокса */
+.search-form__label:hover .search-form__fieldset-title,
+.search-form__checkbox-list-item .search-form__label:hover {
+  text-decoration: underline;
+}
+
+/* ====================================
+   ШАГ 5. СТИЛИ КНОПОК
+   ==================================== */
+
+/* Общий класс кнопки */
+.button {
+  display: block;
+  background-color: transparent;
+  border: 1px solid var(--color-text);
+  color: var(--color-text);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1;
+  padding-block: 6px;
+  padding-inline: 20px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Кнопка «Найти» */
+.search-form__submit-button {
+  align-self: flex-end;
+  inline-size: 194px;
+  padding-block: 6px;
+}
+
+/* Кнопка «Показать ещё» */
+.more-button {
+  inline-size: 100%;
+  padding-block: 12px;
+  margin-block-start: 4px;
+}
+
+/* Состояния кнопок */
+.button:hover {
+  text-decoration: underline;
+}
+
+.button:active {
+  background-color: var(--color-active);
+  text-decoration: none;
+}
+
+.button:focus {
+  outline: none;
+}
+
+.button:focus-visible {
+  outline: 1px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* ====================================
+   ШАГ 6. СОСТОЯНИЯ КАРТОЧЕК
+   ==================================== */
+
+/* Текущая (активная) карточка */
+.content__card-link_current {
+  background-color: var(--color-active);
+}
+
+/* Карточка при наведении */
+.content__card-link:hover {
+  text-decoration: underline;
+}
+
+/* Карточка при активации */
+.content__card-link:active {
+  background-color: var(--color-active);
+}
+
+/* Карточка при фокусе */
+.content__card-link:focus {
+  outline: none;
+}
+
+.content__card-link:focus-visible {
+  outline: 1px solid var(--color-text);
+  outline-offset: 1px;
+}
+
+/* ====================================
+   ШАГ 7. КУРСОР
+   ==================================== */
+
+.content__card-link,
+.button,
+.search-form__label {
+  cursor: pointer;
+}
+
+/* ====================================
+   ШАГ 8. ПОЗИЦИОНИРОВАНИЕ ПРЕЛОАДЕРОВ
+   ==================================== */
+
+/* Родители для абсолютно позиционированных прелоадеров */
+.result__video-container {
+  position: relative;
+}
+
+.content__list-container {
+  position: relative;
 }

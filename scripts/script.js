@@ -1,308 +1,446 @@
-/* КОНФИГ */
-const preloaderWaitindTime = 1200;
-const cardsOnPage = 5;
-const BASE_URL = 'https://v-content.practicum-team.ru';
-const endpoint = `${BASE_URL}/api/videos?pagination[pageSize]=${cardsOnPage}&`;
+'use strict';
 
-/* ЭЛЕМЕНТЫ СТРАНИЦЫ */
-const cardsList = document.querySelector('.content__list');
-const cardsContainer = document.querySelector('.content__list-container');
-const videoContainer = document.querySelector('.result__video-container');
-const videoElement = document.querySelector('.result__video');
-const form = document.querySelector('form');
+/* =====================================================
+   НАСТРОЙКИ
+   ===================================================== */
 
-/* ТЕМПЛЕЙТЫ */
-const cardTmp = document.querySelector('.cards-list-item-template');
-const preloaderTmp = document.querySelector('.preloader-template');
-const videoNotFoundTmp = document.querySelector('.error-template');
-const moreButtonTmp = document.querySelector('.more-button-template');
+const CARDS_PER_PAGE = 5;
 
-/* МЕХАНИКА */
+/* =====================================================
+   МОКДАННЫЕ
+   Используются, если API недоступен.
+   Замените на реальный запрос к API при необходимости.
+   ===================================================== */
 
-// Нужен для работы с переключателями
-let cardsOnPageState = [];
+const mockVideos = [
+  {
+    id: '1',
+    city: 'лондон',
+    time_of_day: ['day', 'evening'],
+    title: 'Вид из окна. Лондон. Вестминстер.',
+    description:
+      'На набережной Темзы у Вестминстерского дворца всегда многолюдно. Туристы, местные жители и политики снуют мимо каждый день.',
+    thumbnail: 'https://picsum.photos/seed/london1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+  },
+  {
+    id: '2',
+    city: 'токио',
+    time_of_day: ['day'],
+    title: 'Вид из окна. Токио. Синдзюку.',
+    description:
+      'На этой улице района Синдзюку находится более 200 баров и ресторанов. Вечером всё сверкает неоновыми огнями.',
+    thumbnail: 'https://picsum.photos/seed/tokyo1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  },
+  {
+    id: '3',
+    city: 'нью-йорк',
+    time_of_day: ['morning', 'day'],
+    title: 'Вид из окна. Нью-Йорк. Таймс-сквер.',
+    description:
+      'Таймс-сквер не спит никогда. Огни рекламы и поток людей не прекращаются ни днём ни ночью.',
+    thumbnail: 'https://picsum.photos/seed/nyc1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+  },
+  {
+    id: '4',
+    city: 'париж',
+    time_of_day: ['evening', 'night'],
+    title: 'Вид из окна. Париж. Монмартр.',
+    description:
+      'Холм Монмартр — один из самых романтичных уголков Парижа. Отсюда открывается вид на весь город, а ночью огни Эйфелевой башни видны издалека.',
+    thumbnail: 'https://picsum.photos/seed/paris1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+  },
+  {
+    id: '5',
+    city: 'берлин',
+    time_of_day: ['morning', 'day'],
+    title: 'Вид из окна. Берлин. Митте.',
+    description:
+      'Исторический центр Берлина. Рядом Бранденбургские ворота и Рейхстаг. Утром здесь особенно тихо.',
+    thumbnail: 'https://picsum.photos/seed/berlin1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+  },
+  {
+    id: '6',
+    city: 'москва',
+    time_of_day: ['day', 'evening'],
+    title: 'Вид из окна. Москва. Арбат.',
+    description:
+      'Старый Арбат — пешеходная улица в самом центре Москвы. Здесь всегда найдётся место уличным музыкантам и художникам.',
+    thumbnail: 'https://picsum.photos/seed/moscow1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+  },
+  {
+    id: '7',
+    city: 'амстердам',
+    time_of_day: ['morning', 'day'],
+    title: 'Вид из окна. Амстердам. Каналы.',
+    description:
+      'Утренний туман над каналами Амстердама. Узкие домики отражаются в воде, а велосипедисты спешат на работу.',
+    thumbnail: 'https://picsum.photos/seed/amsterdam1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+  },
+  {
+    id: '8',
+    city: 'барселона',
+    time_of_day: ['day'],
+    title: 'Вид из окна. Барселона. Готический квартал.',
+    description:
+      'Готический квартал — сердце Барселоны. Узкие улицы, средневековые здания и всегда живая атмосфера.',
+    thumbnail: 'https://picsum.photos/seed/barcelona1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+  },
+  {
+    id: '9',
+    city: 'дубай',
+    time_of_day: ['night'],
+    title: 'Вид из окна. Дубай. Бурдж-Халифа.',
+    description:
+      'Ночной Дубай с высоты Бурдж-Халифы. Город огней растянулся до самого горизонта, освещая пустыню вокруг.',
+    thumbnail: 'https://picsum.photos/seed/dubai1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+  },
+  {
+    id: '10',
+    city: 'сидней',
+    time_of_day: ['morning'],
+    title: 'Вид из окна. Сидней. Оперный театр.',
+    description:
+      'Раннее утро у Сиднейского оперного театра. Рассвет окрашивает паруса крыши в нежно-розовый цвет.',
+    thumbnail: 'https://picsum.photos/seed/sydney1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+  },
+  {
+    id: '11',
+    city: 'рим',
+    time_of_day: ['evening'],
+    title: 'Вид из окна. Рим. Трастевере.',
+    description:
+      'Трастевере — один из старейших и самых атмосферных районов Рима. Вечером тут оживают таверны и пьяцца.',
+    thumbnail: 'https://picsum.photos/seed/rome1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+  },
+  {
+    id: '12',
+    city: 'стамбул',
+    time_of_day: ['morning', 'day'],
+    title: 'Вид из окна. Стамбул. Босфор.',
+    description:
+      'Вид на пролив Босфор, где встречаются Европа и Азия. Паромы снуют туда-сюда круглосуточно.',
+    thumbnail: 'https://picsum.photos/seed/istanbul1/640/360',
+    videoLink:
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+  },
+];
 
-// Первая загрузка ✅
+/* =====================================================
+   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+   ===================================================== */
 
-showPreloader(preloaderTmp, videoContainer);
-showPreloader(preloaderTmp, cardsContainer);
-mainMechanics(endpoint);
-
-// осуществляется поиск ✅
-form.onsubmit = (e) => {
-  e.preventDefault();
-
-  cardsList.textContent = '';
-  const buttonInDOM = cardsContainer.querySelector('.more-button');
-  if (buttonInDOM) {
-    buttonInDOM.remove();
+/**
+ * Получить DOM-элемент по селектору (с проверкой)
+ */
+function getElement(selector) {
+  const el = document.querySelector(selector);
+  if (!el) {
+    throw new Error(`Элемент "${selector}" не найден`);
   }
+  return el;
+}
 
-  [...videoContainer.children].forEach((el) => {
-    el.className === 'error' && el.remove();
+/**
+ * Создать экземпляр из шаблона
+ */
+function createFromTemplate(templateSelector) {
+  const template = document.querySelector(templateSelector);
+  return template.content.cloneNode(true);
+}
+
+/**
+ * Показать прелоадер в контейнере
+ */
+function showPreloader(container) {
+  const preloaderFragment = createFromTemplate('.preloader-template');
+  container.appendChild(preloaderFragment);
+}
+
+/**
+ * Убрать все прелоадеры из контейнера
+ */
+function hidePreloader(container) {
+  const preloaders = container.querySelectorAll('.preloader');
+  preloaders.forEach((el) => el.remove());
+}
+
+/* =====================================================
+   РАБОТА С ДАННЫМИ
+   ===================================================== */
+
+let allData = []; // все данные из источника
+let currentOffset = 0; // сколько карточек уже показано
+
+/**
+ * Фильтрация данных по параметрам формы
+ */
+function filterData(data, city, timesOfDay) {
+  return data.filter((item) => {
+    const cityMatch =
+      !city || item.city.toLowerCase().includes(city.toLowerCase());
+    const timeMatch =
+      timesOfDay.length === 0 ||
+      timesOfDay.some((t) => item.time_of_day.includes(t));
+    return cityMatch && timeMatch;
   });
+}
 
-  showPreloader(preloaderTmp, videoContainer);
-  showPreloader(preloaderTmp, cardsContainer);
-
-  const formData = serializeFormData(form);
-  const requestUrl = generateFilterRequest(
-    endpoint,
-    formData.city,
-    formData.timeArray
-  );
-
-  mainMechanics(requestUrl);
-};
-
-/* ФУНКЦИЯ, КОТОРАЯ ВСЕ ГЕНЕРИТ */
-
-async function mainMechanics(endpoint) {
+/**
+ * Загрузка данных (с API или мок)
+ */
+async function fetchData() {
+  // Пробуем реальный API. Если не удаётся — используем мок.
   try {
-    const data = await (await fetch(endpoint)).json();
-    cardsOnPageState = data.results;
-
-    if (!data?.results?.[0]) {
-      throw new Error('not-found');
+    const response = await fetch('https://api.nomoreparties.co/windows-view', {
+      method: 'GET',
+    });
+    if (!response.ok) {
+      throw new Error('API недоступен');
     }
+    return await response.json();
+  } catch {
+    // Возвращаем мок-данные как запасной вариант
+    return mockVideos;
+  }
+}
 
-    appendCards({
-      baseUrl: BASE_URL,
-      dataArray: data.results,
-      cardTmp,
-      container: cardsList,
-    });
+/* =====================================================
+   ОТРИСОВКА
+   ===================================================== */
 
-    setVideo({
-      baseUrl: BASE_URL,
-      video: videoElement,
-      videoUrl: data.results[0].video.url,
-      posterUrl: data.results[0].poster.url,
-    });
-    document
-      .querySelectorAll('.content__card-link')[0]
-      .classList.add('content__card-link_current');
-    await waitForReadyVideo(videoElement);
-    await delay(preloaderWaitindTime);
-    removePreloader(videoContainer, '.preloader');
-    removePreloader(cardsContainer, '.preloader');
+/**
+ * Создать одну карточку из шаблона
+ */
+function createCard(data) {
+  const fragment = createFromTemplate('.card-template');
+  const link = fragment.querySelector('.content__card-link');
+  const thumbnail = fragment.querySelector('.content__video-card-thumbnail');
+  const title = fragment.querySelector('.content__video-card-title');
+  const description = fragment.querySelector('.content__video-card-description');
 
-    // Добавляем класс для стилизации скроллбара
-    cardsContainer.classList.add('custom-scrollbar');
+  link.dataset.videoLink = data.videoLink;
+  thumbnail.src = data.thumbnail;
+  thumbnail.alt = data.title;
+  title.textContent = data.title;
+  description.textContent = data.description;
 
-    chooseCurrentVideo({
-      baseUrl: BASE_URL,
-      videoData: cardsOnPageState,
-      cardLinksSelector: '.content__card-link',
-      currentLinkClassName: 'content__card-link_current',
-      mainVideo: videoElement,
-    });
+  return fragment;
+}
 
-    showMoreCards({
-      dataArray: data,
-      buttonTemplate: moreButtonTmp,
-      cardsList,
-      buttonSelector: '.more-button',
-      initialEndpoint: endpoint,
-      baseUrl: BASE_URL,
-      cardTmp: cardTmp,
-    });
+/**
+ * Добавить карточки в список
+ */
+function renderCards(data, cardList, isFirst = false) {
+  const fragment = document.createDocumentFragment();
+  data.forEach((item) => {
+    fragment.appendChild(createCard(item));
+  });
+  cardList.appendChild(fragment);
+
+  // Делаем первую карточку активной
+  if (isFirst) {
+    const firstLink = cardList.querySelector('.content__card-link');
+    if (firstLink) {
+      firstLink.classList.add('content__card-link_current');
+    }
+  }
+}
+
+/**
+ * Показать кнопку «Показать ещё»
+ */
+function showMoreButton(container, onClick) {
+  removeMoreButton(container);
+  const fragment = createFromTemplate('.more-button-template');
+  const button = fragment.querySelector('.more-button');
+  button.addEventListener('click', onClick);
+  container.appendChild(button);
+}
+
+/**
+ * Убрать кнопку «Показать ещё»
+ */
+function removeMoreButton(container) {
+  const existing = container.querySelector('.more-button');
+  if (existing) existing.remove();
+}
+
+/**
+ * Показать ошибку вместо видео
+ */
+function showError(videoContainer, message) {
+  const fragment = createFromTemplate('.error-template');
+  const errorText = fragment.querySelector('.result__error-text');
+  errorText.textContent = message;
+  videoContainer.innerHTML = '';
+  videoContainer.appendChild(fragment);
+}
+
+/* =====================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ===================================================== */
+
+async function init() {
+  const videoElement = getElement('#result-video');
+  const videoContainer = getElement('#video-container');
+  const cardList = getElement('#card-list');
+  const listContainer = getElement('#list-container');
+  const searchForm = getElement('#search-form');
+
+  // Показываем прелоадеры
+  showPreloader(videoContainer);
+  showPreloader(listContainer);
+
+  try {
+    allData = await fetchData();
   } catch (err) {
-    if (err.message === 'not-found') {
-      showError(videoContainer, videoNotFoundTmp, 'Нет подходящих видео =(');
-    } else {
-      showError(videoContainer, videoNotFoundTmp, 'Ошибка получения данных :(');
+    hidePreloader(videoContainer);
+    hidePreloader(listContainer);
+    showError(videoContainer, 'Не удалось загрузить данные. Попробуйте позже.');
+    return;
+  }
+
+  hidePreloader(videoContainer);
+  hidePreloader(listContainer);
+
+  if (!allData || allData.length === 0) {
+    showError(videoContainer, 'Ничего не найдено. Попробуйте изменить параметры поиска.');
+    return;
+  }
+
+  // Подставляем первое видео
+  videoElement.src = allData[0].videoLink;
+
+  // Показываем первые N карточек
+  currentOffset = 0;
+  const firstBatch = allData.slice(currentOffset, currentOffset + CARDS_PER_PAGE);
+  renderCards(firstBatch, cardList, true);
+  currentOffset += firstBatch.length;
+
+  // Если есть ещё — добавляем кнопку
+  if (currentOffset < allData.length) {
+    showMoreButton(listContainer, handleMoreButtonClick);
+  }
+
+  /* =====================================================
+     ОБРАБОТЧИКИ СОБЫТИЙ
+     ===================================================== */
+
+  /**
+   * Клик по карточке — меняем видео
+   */
+  cardList.addEventListener('click', (evt) => {
+    const link = evt.target.closest('.content__card-link');
+    if (!link) return;
+    evt.preventDefault();
+
+    // Снимаем активный класс со всех карточек
+    cardList.querySelectorAll('.content__card-link_current').forEach((el) => {
+      el.classList.remove('content__card-link_current');
+    });
+
+    // Добавляем активный класс кликнутой карточке
+    link.classList.add('content__card-link_current');
+
+    // Меняем видео
+    const newSrc = link.dataset.videoLink;
+    if (newSrc) {
+      videoElement.src = newSrc;
+      videoElement.play();
     }
-    console.log(err);
-    removePreloader(videoContainer, '.preloader');
-    removePreloader(cardsContainer, '.preloader');
-  }
-}
-
-/* УТИЛИТЫ */
-
-// Простой промис, чтобы легче ставить паузу ✅
-
-async function delay(ms) {
-  return await new Promise((resolve) => {
-    return setTimeout(resolve, ms);
   });
-}
 
-// Промис, который резолвится, если видео целиком готово к проинрыванию без пауз
+  /**
+   * Клик «Показать ещё»
+   */
+  function handleMoreButtonClick() {
+    const nextBatch = allData.slice(currentOffset, currentOffset + CARDS_PER_PAGE);
+    renderCards(nextBatch, cardList, false);
+    currentOffset += nextBatch.length;
 
-async function waitForReadyVideo(video) {
-  return await new Promise((resolve) => {
-    video.oncanplaythrough = resolve;
-  });
-}
-
-// Устанавливает прелоадер на время загрузки данных ✅
-function showPreloader(tmp, parent) {
-  const node = tmp.content.cloneNode(true);
-  parent.append(node);
-  console.log('показал прелоадер');
-}
-
-// Убирает прелоадер из DOM ✅
-function removePreloader(parent, preloaderSelector) {
-  const preloader = parent.querySelector(preloaderSelector);
-  if (preloader) {
-    preloader.remove();
+    if (currentOffset >= allData.length) {
+      removeMoreButton(listContainer);
+    }
   }
 
-  console.log('убрал прелоадер');
-}
+  /**
+   * Отправка формы поиска
+   */
+  searchForm.addEventListener('submit', async (evt) => {
+    evt.preventDefault();
 
-// Добавляет карточки в контейнер, собирая их из данных API ✅
-function appendCards({ baseUrl, dataArray, cardTmp, container }) {
-  dataArray.forEach((el) => {
-    const node = cardTmp.content.cloneNode(true);
-    node.querySelector('a').setAttribute('id', el.id);
-    node.querySelector('.content__video-card-title').textContent = el.city;
-    node.querySelector('.content__video-card-description').textContent =
-      el.description;
-    node
-      .querySelector('.content__video-card-thumbnail')
-      .setAttribute('src', `${baseUrl}${el.thumbnail.url}`);
-    node
-      .querySelector('.content__video-card-thumbnail')
-      .setAttribute('alt', el.description);
-    container.append(node);
-  });
-  console.log('Сгенерировал карточки');
-}
+    const cityValue = searchForm.city.value.trim();
+    const checkedTimes = Array.from(
+      searchForm.querySelectorAll('.search-form__checkbox:checked')
+    ).map((cb) => cb.value);
 
-// Устанавливет внужное видео в контейнер ✅
-function setVideo({ baseUrl, video, videoUrl, posterUrl }) {
-  video.setAttribute('src', `${baseUrl}${videoUrl}`);
-  video.setAttribute('poster', `${baseUrl}${posterUrl}`);
-  console.log('Подставил видео в основной блок');
-}
+    // Прелоадеры
+    cardList.innerHTML = '';
+    removeMoreButton(listContainer);
+    showPreloader(listContainer);
 
-// получает данные из формы и сериализует как надо ✅
+    const videoOldSrc = videoElement.src;
+    showPreloader(videoContainer);
 
-function serializeFormData(form) {
-  const city = form.querySelector('input[name="city"]');
-  const checkboxes = form.querySelectorAll('input[name="time"]');
-  const checkedValuesArray = [...checkboxes].reduce((acc, item) => {
-    item.checked && acc.push(item.value);
-    return acc;
-  }, []);
-  console.log('Собрал данные формы в объект');
-  return {
-    city: city.value,
-    timeArray: checkedValuesArray,
-  };
-}
+    // Имитируем задержку запроса для UX
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-// Генерирует строку с фильтрами запросов в API в зависимости от данных из формы ✅
-function generateFilterRequest(endpoint, city, timeArray) {
-  if (city) {
-    endpoint += `filters[city][$containsi]=${city}&`;
-  }
-  if (timeArray) {
-    timeArray.forEach((timeslot) => {
-      endpoint += `filters[time_of_day][$eqi]=${timeslot}&`;
-    });
-  }
-  console.log('Сгенерировал строку адреса запроса в API из данных формы');
-  return endpoint;
-}
+    hidePreloader(listContainer);
+    hidePreloader(videoContainer);
 
-// переключает текущее видео ✅
-function chooseCurrentVideo({
-  baseUrl,
-  videoData,
-  cardLinksSelector,
-  currentLinkClassName,
-  mainVideo,
-}) {
-  const cardsList = document.querySelectorAll(cardLinksSelector);
-  if (cardsList) {
-    cardsList.forEach((item) => {
-      item.onclick = async (e) => {
-        e.preventDefault();
-        cardsList.forEach((item) => {
-          item.classList.remove(currentLinkClassName);
-        });
-        item.classList.add(currentLinkClassName);
-        showPreloader(preloaderTmp, videoContainer);
-        const vidoObj = videoData.find(
-          (video) => String(video.id) === String(item.id)
-        );
-        setVideo({
-          baseUrl,
-          video: mainVideo,
-          videoUrl: vidoObj.video.url,
-          posterUrl: vidoObj.poster.url,
-        });
-        await waitForReadyVideo(mainVideo);
-        await delay(preloaderWaitindTime);
-        removePreloader(videoContainer, '.preloader');
-        console.log('Переключил видео');
-      };
-    });
-  }
-}
+    const filtered = filterData(allData, cityValue, checkedTimes);
 
-// вывожу интерфейс, когда видео не найдено ✅
-function showError(container, errorTemplate, errorMessage) {
-  const node = errorTemplate.content.cloneNode(true);
-  node.querySelector('.error__title').textContent = errorMessage;
-  container.append(node);
-  console.log('показал, ошибку');
-}
+    if (filtered.length === 0) {
+      showError(
+        videoContainer,
+        'По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.'
+      );
+      return;
+    }
 
-// вывожу больше видео, если в пагинации больше страниц, чем показано
+    // Восстанавливаем/меняем видео
+    videoElement.src = filtered[0].videoLink;
 
-function showMoreCards({
-  dataArray,
-  buttonTemplate,
-  cardsList,
-  buttonSelector,
-  initialEndpoint,
-  baseUrl,
-  cardTmp,
-}) {
-  if (dataArray.pagination.page === dataArray.pagination.pageCount) return;
-  // добавить кнопку из темплейта в конец списка карточек
-  const button = buttonTemplate.content.cloneNode(true);
-  cardsContainer.append(button);
-  // Выберем добавленный элемент по селектору и добавим слушатель клика
-  const buttonInDOM = cardsContainer.querySelector(buttonSelector);
-  buttonInDOM.addEventListener('click', async () => {
-    // по клику запросим данные для следующей страницы
-    let currentPage = dataArray.pagination.page;
-    let urlToFetch = `${initialEndpoint}pagination[page]=${(currentPage += 1)}&`;
-    try {
-      let data = await (await fetch(urlToFetch)).json();
-      buttonInDOM.remove();
-      cardsOnPageState = cardsOnPageState.concat(data.results);
-      appendCards({
-        baseUrl,
-        dataArray: data.results,
-        cardTmp,
-        container: cardsList,
+    currentOffset = 0;
+    const firstBatch = filtered.slice(currentOffset, currentOffset + CARDS_PER_PAGE);
+    renderCards(firstBatch, cardList, true);
+    currentOffset += firstBatch.length;
+
+    if (currentOffset < filtered.length) {
+      // Переопределяем обработчик кнопки под новый filtered
+      showMoreButton(listContainer, () => {
+        const nextBatch = filtered.slice(currentOffset, currentOffset + CARDS_PER_PAGE);
+        renderCards(nextBatch, cardList, false);
+        currentOffset += nextBatch.length;
+        if (currentOffset >= filtered.length) {
+          removeMoreButton(listContainer);
+        }
       });
-      chooseCurrentVideo({
-        baseUrl: BASE_URL,
-        videoData: cardsOnPageState,
-        cardLinksSelector: '.content__card-link',
-        currentLinkClassName: 'content__card-link_current',
-        mainVideo: videoElement,
-      });
-      showMoreCards({
-        dataArray: data,
-        buttonTemplate,
-        cardsList,
-        buttonSelector,
-        initialEndpoint,
-        baseUrl,
-        cardTmp,
-      });
-    } catch (err) {
-      return err;
     }
   });
 }
+
+// Запускаем приложение
+init();
