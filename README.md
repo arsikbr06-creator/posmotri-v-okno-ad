@@ -28,7 +28,7 @@
 Клонируйте репозиторий и откройте `index.html` в браузере.
 
 ```bash
-git clone https://github.com/ваш-логин/название-репозитория.git
+git clone https://github.com/arsikbr06-creator/posmotri-v-okno-ad
 ```
 
 ## Ссылки
